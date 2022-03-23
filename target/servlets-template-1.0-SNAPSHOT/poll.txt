@@ -1,6 +1,0 @@
-A question?
-Angular
-Vue
-React
-Svelte
-Ember

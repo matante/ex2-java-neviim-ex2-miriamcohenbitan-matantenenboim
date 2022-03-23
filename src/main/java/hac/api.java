@@ -1,9 +1,6 @@
 package hac;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonWriter;
+import javax.json.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -13,8 +10,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 
 // a simple demo servlet to remove from your repo upon submission!
@@ -23,50 +20,81 @@ public class api extends HttpServlet {
 
 
     private final String PARAM_NAME = "POLLFILE";
-    private List<String> lines = new ArrayList<>();
+    private final static Map<String, Integer> poll = new HashMap<>();
+    private String question = "";
 
 
     public void init() {
-        System.out.println("in init");
         String fileName = getServletContext().getInitParameter(PARAM_NAME);
         String filePath = getServletContext().getRealPath(fileName);
 
         // read line by line
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
+            question = br.readLine();
             while ((line = br.readLine()) != null) {
-                lines.add(line);
+                poll.put(line, 0);
+                //lines.add(line);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("finished init");
+
     }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("in get");
+
         response.setContentType("text/json");
         response.setCharacterEncoding("UTF-8");
-        JsonObjectBuilder builder = Json.createObjectBuilder();
-        builder.add("title", lines.get(0));
-        for (int i = 1; i < lines.size(); i ++){
-            builder.add("answer" + i, lines.get(i));
+
+        JsonArrayBuilder builder = Json.createArrayBuilder();
+
+
+        builder.add(question);
+
+        for (String answer : poll.keySet()) {
+            builder.add(answer);
+            builder.add(poll.get(answer));
         }
 
-        JsonObject jsonObject = builder.build();
+        JsonArray jsonArray = builder.build();
         try (OutputStream out = response.getOutputStream()) {
             JsonWriter jsonw = Json.createWriter(out);
-            jsonw.write(jsonObject);
+            jsonw.write(jsonArray);
             jsonw.close();
-        }catch (Exception e){
+        } catch (Exception e) {
+            //todo
             System.out.println("catch");
         }
-        System.out.println("out of get");
+
     }
 
+    @Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
+        response.setContentType("text/json");
+        response.setCharacterEncoding("UTF-8");
+
+        JsonArrayBuilder builder = Json.createArrayBuilder();
+
+
+        builder.add("question");
+
+
+        JsonArray jsonArray = builder.build();
+        try (OutputStream out = response.getOutputStream()) {
+            JsonWriter jsonw = Json.createWriter(out);
+            jsonw.write(jsonArray);
+            jsonw.close();
+        } catch (Exception e) {
+            //todo
+            System.out.println("catch");
+        }
+
+    }
 
 
     public void destroy() {
