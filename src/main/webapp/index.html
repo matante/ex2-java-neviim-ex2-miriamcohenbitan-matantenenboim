@@ -10,15 +10,13 @@
     <title>Exercise 2 - Miriam Cohen Bitan and Matan Tenenboim</title>
 </head>
 <body>
-<h1>Hello Wobsdvsrld!</h1>
+<h1>Exercise 2 - Miriam Cohen Bitan and Matan Tenenboim</h1>
 
 
 <div class="container">
     <div class="row">
-        <div class="col-md-3">
-
-            <form action="/vote" method="post">
-
+        <div class="col-md-4">
+            <form action="/api/vote" method="post" id="inputForm">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
                         <h3 class="panel-title">
@@ -28,7 +26,6 @@
                     </div>
                     <div class="panel-body">
                         <ul class="list-group" id="answers">
-
                         </ul>
                     </div>
                     <br>
@@ -36,17 +33,68 @@
                         <button type="submit" class="btn btn-primary btn-sm">
                             Vote
                         </button>
-                        <a href="#">View Result</a></div>
-
+                    </div>
                 </div>
             </form>
+        </div>
+        <div class="col-md-1">
+            <form>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <span class="glyphicon glyphicon-arrow-right">Results </span>
+                            <span class="glyphicon glyphicon-new-window"></span>
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="list-group" id="votes">
+                            <li class="list-group-item">
+                                <div class="radio">
+                                    <label>
+                                        1
+                                    </label>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="radio">
+                                    <label>
+                                        1
+                                    </label>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="radio">
+                                    <label>
+                                        1
+                                    </label>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="radio">
+                                    <label>
+                                        1
+                                    </label>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="radio">
+                                    <label>
+                                        1
+                                    </label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <br>
+                    <div class="panel-footer">
 
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 
-<br/>
-<a href="hello-servlet">Hello Snkjhniulervlet</a>
 </body>
 </html>
