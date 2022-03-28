@@ -3,6 +3,7 @@ package hac;
 import javax.json.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +29,7 @@ public class vote extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         JsonArrayBuilder builder = Json.createArrayBuilder();
 
-        for (Answer answer : poll.getAnswers()){
+        for (Answer answer : poll.getAnswers()) {
             builder.add(answer.getVotes());
         }
 
@@ -50,21 +51,35 @@ public class vote extends HttpServlet {
         response.setContentType("text/json");
         response.setCharacterEncoding("UTF-8");
 
+        boolean isFirstVote = true;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("voted")) {
+                    isFirstVote = false;
+                    break;
+                }
+            }
+        } else { // first time to vote, cookies array is null
+            Cookie voteCookie = new Cookie("voted", "true");
+            voteCookie.setMaxAge(10);
+            response.addCookie(voteCookie);
+        }
+
         String answerFromUser = request.getParameter("answer");
 
-        if (answerFromUser.length() > 0 ){
-            poll.voteTo(request.getParameter("answer"));
-            response.setStatus(200); // todo : cookies
-        }else{
+        if (answerFromUser.length() > 0 && isFirstVote) { // user chose answer and ...
+            poll.voteTo(answerFromUser);
+            response.setStatus(200);
+        } else {
             response.setStatus(400);
         }
 
-        //forward to get
 
     }
 
 
     public void destroy() {
-        System.out.println("des");
+
     }
 }

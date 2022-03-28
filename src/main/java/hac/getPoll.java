@@ -53,6 +53,6 @@ public class getPoll extends HttpServlet {
 
 
     public void destroy() {
-        System.out.println("des");
+
     }
 }

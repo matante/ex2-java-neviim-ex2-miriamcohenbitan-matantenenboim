@@ -21,7 +21,7 @@
 
         let votes = document.getElementById("votes");
         votes.innerText = "";
-
+        console.log(json)
         for (let i = 0; i < json.length; i++) {
             votes.innerHTML += ` <li class="list-group-item">
                                 <div class="radio">
@@ -33,7 +33,6 @@
         `
         }
     }
-
 
 
     function fetchQuestionAnswers() {
@@ -59,16 +58,12 @@
     document.addEventListener('DOMContentLoaded', () => { // wait for page to load
         fetchQuestionAnswers();
         fetchVotes();
-
-
         let form = document.getElementById('inputForm');
-
         form.addEventListener('submit', submitForm);
-
-
     })
 
     const submitForm = async function (event) {
+        let votingError = document.getElementById('invalidVote');
         event.preventDefault()
         let selectedAnswer = "";
         const answers = document.querySelectorAll('input[name="optionsRadios"]');
@@ -78,38 +73,52 @@
                 break;
             }
         }
-
-        let params = {answer: selectedAnswer}
         await fetch("/api/vote", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'datatype': 'json'
             },
-            body: new URLSearchParams(params).toString()
+            body: new URLSearchParams({answer: selectedAnswer}).toString()
+        }).then((res) => {
+            console.log("status: " + res.status)
+            switch (res.status) {
+                case 200:
+                    votingError.classList.add('d-none');
+                    break;
+                case 400:
+                    votingError.classList.remove('d-none');
+                    break;
+            }
         })
-            .then(function (response) {
+            .then(fetchVotes)
+            .catch(function (err){
+                console.log("in error!!!!" + err)
+            })
+        // todo need to see why console prints 400 as error
 
-            }).then(fetchVotes)
-            .then(function(json) {
-                displayPollVotes(json);
-        })
+
+        // await fetch("/api/vote", {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/x-www-form-urlencoded',
+        //         'datatype': 'json'
+        //     },
+        //     body: new URLSearchParams({answer: selectedAnswer}).toString()
+        // })
+        //     .then(function (response) {
+        //     })
+        //     .then(fetchVotes)
+        //     .then(function (response) {
+        //     })
+        //     .then(function (json) {
+        //         console.log("new json")
+        //         console.log(json)
+        //         displayPollVotes(json);
+        //     }).catch()//todo
     }
 
 
 })()
 
-
-// const f = function () {
-//
-//     return fetch("/api", {method: "GET"})
-//         .then(res => res.json())
-//         .then(json => {
-//             console.log(json)
-//             updatePoll(json);
-//         })
-//         .catch(function (err) {
-// //todo
-//         })
-// }()
 
