@@ -1,6 +1,7 @@
 package hac;
 
 import java.io.*;
+import java.util.ArrayList;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
@@ -17,14 +18,21 @@ public class home extends HttpServlet {
 
         // read line by line
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-
-            getServletContext().setAttribute("poll", new Poll(br.readLine()));
-            Poll poll = (Poll) getServletContext().getAttribute("poll");
-
+            ArrayList<String> lines = new ArrayList<>();
             String line;
             while ((line = br.readLine()) != null) {
-                poll.addAnswer(line);
+                if (!line.equals(""))
+                    lines.add(line);
             }
+
+            getServletContext().setAttribute("poll", new Poll(lines.get(0)));
+            Poll poll = (Poll) getServletContext().getAttribute("poll");
+
+            for (int i = 1; i < lines.size(); i++) {
+                poll.addAnswer(lines.get(i));
+            }
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }

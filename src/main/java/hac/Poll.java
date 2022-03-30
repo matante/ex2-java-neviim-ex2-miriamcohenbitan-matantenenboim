@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 public class Poll {
     String question;
-    ArrayList<Answer> answers = new ArrayList<Answer>(); // Create an ArrayList object
+    ArrayList<Answer> answers = new ArrayList<>();
 
     public Poll(String otherQuestion){
-        question = otherQuestion.length() > 0 ? otherQuestion : "";
+        question = otherQuestion;
     }
 
     public String getQuestion(){

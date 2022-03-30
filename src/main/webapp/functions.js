@@ -21,7 +21,6 @@
 
         let votes = document.getElementById("votes");
         votes.innerText = "";
-        console.log(json)
         for (let i = 0; i < json.length; i++) {
             votes.innerHTML += ` <li class="list-group-item">
                                 <div class="radio">
@@ -34,37 +33,75 @@
         }
     }
 
+    // takes an array
+    function hideElements(ids) {
+        for (let id of ids)
+            document.getElementById(`${id}`).classList.add('d-none');
+    }
 
-    function fetchQuestionAnswers() {
-        fetch("/api/getPoll", {method: "GET"})
+    // takes an array
+    function revealElements(ids) {
+        for (let id of ids)
+            document.getElementById(`${id}`).classList.remove('d-none');
+    }
+
+
+    function status(response) {
+        if (response.status >= 200 && response.status < 300) {
+            return Promise.resolve(response)
+        } else {
+            return Promise.reject(new Error(response.statusText))
+        }
+    }
+
+    async function fetchQuestionAnswers() {
+        await fetch("/api/getPoll", {method: "GET"})
+            .then(status)
             .then(res => res.json())
             .then(json => {
                 displayPollAnswers(json);
-            })// add votes
-            .catch(function (err) { //todo add catch
+            })
+            .catch(function (err) {
+                return Promise.reject(new Error(err.statusText))
             })
     }
 
-    function fetchVotes() {
-        fetch("/api/vote", {method: "GET"})
+
+    async function fetchVotes() {
+        await fetch("/api/vote", {method: "GET"})
             .then(res => res.json())
             .then(json => {
                 displayPollVotes(json);
             })// add votes
-            .catch(function (err) { //todo add catch
+            .catch(function (err) {
+                return Promise.reject(new Error(err.statusText))
             })
     }
 
     document.addEventListener('DOMContentLoaded', () => { // wait for page to load
-        fetchQuestionAnswers();
-        fetchVotes();
+
+        fetchQuestionAnswers()
+            .then(fetchVotes)
+            .catch((function () {
+                revealElements(['pollError']);
+                hideElements(['noChoice', 'inputForm', 'results', 'invalidVote']);
+
+            }))
+
+
         let form = document.getElementById('inputForm');
         form.addEventListener('submit', submitForm);
     })
 
     const submitForm = async function (event) {
-        let votingError = document.getElementById('invalidVote');
-        event.preventDefault()
+        event.preventDefault();
+
+        const statuses = {
+            SC_OK: 200,
+            SC_BAD_REQUEST: 400,
+            SC_FORBIDDEN: 403,
+        }
+
         let selectedAnswer = "";
         const answers = document.querySelectorAll('input[name="optionsRadios"]');
         for (const answer of answers) {
@@ -73,6 +110,7 @@
                 break;
             }
         }
+
         await fetch("/api/vote", {
             method: 'POST',
             headers: {
@@ -81,41 +119,28 @@
             },
             body: new URLSearchParams({answer: selectedAnswer}).toString()
         }).then((res) => {
-            console.log("status: " + res.status)
+
+
             switch (res.status) {
-                case 200:
-                    votingError.classList.add('d-none');
+                case statuses.SC_OK:
+                    hideElements(['invalidVote', 'pollError', 'noChoice']);
                     break;
-                case 400:
-                    votingError.classList.remove('d-none');
+                case statuses.SC_BAD_REQUEST:
+                    revealElements(['noChoice']);
+                    hideElements(['invalidVote', 'pollError']);
+                    break;
+                case statuses.SC_FORBIDDEN:
+                    revealElements(['invalidVote']);
+                    hideElements(['noChoice', 'pollError']);
                     break;
             }
         })
             .then(fetchVotes)
-            .catch(function (err){
-                console.log("in error!!!!" + err)
+            .catch(function (err) {
+                revealElements(['pollError']);
+                hideElements(['noChoice', 'invalidVote']);
             })
-        // todo need to see why console prints 400 as error
 
-
-        // await fetch("/api/vote", {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/x-www-form-urlencoded',
-        //         'datatype': 'json'
-        //     },
-        //     body: new URLSearchParams({answer: selectedAnswer}).toString()
-        // })
-        //     .then(function (response) {
-        //     })
-        //     .then(fetchVotes)
-        //     .then(function (response) {
-        //     })
-        //     .then(function (json) {
-        //         console.log("new json")
-        //         console.log(json)
-        //         displayPollVotes(json);
-        //     }).catch()//todo
     }
 
 

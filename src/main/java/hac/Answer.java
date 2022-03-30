@@ -5,7 +5,7 @@ public class Answer {
     private int votes;
 
     Answer(String otherAnswer){
-        answer = otherAnswer.length() > 0 ? otherAnswer : "";
+        answer = otherAnswer;
         votes = 0;
     }
 
@@ -13,7 +13,7 @@ public class Answer {
         return answer;
     }
 
-    public void vote(){
+    public synchronized void vote(){
         votes ++;
     }
     public int getVotes(){

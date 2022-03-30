@@ -35,6 +35,9 @@ public class getPoll extends HttpServlet {
         for (Answer answer : poll.getAnswers()){
             builder.add(answer.getAnswer());
         }
+        final int MINIMUM_LINES = 3;
+        response.setStatus(poll.getAnswers().size() >= MINIMUM_LINES ?
+                HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST);
 
 
         JsonArray jsonArray = builder.build();
@@ -43,8 +46,7 @@ public class getPoll extends HttpServlet {
             jsonw.write(jsonArray);
             jsonw.close();
         } catch (Exception e) {
-            //todo
-            System.out.println("catch");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
 
     }

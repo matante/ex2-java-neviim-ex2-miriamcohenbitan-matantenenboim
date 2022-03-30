@@ -23,7 +23,7 @@ public class vote extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException {
 
         response.setContentType("text/json");
         response.setCharacterEncoding("UTF-8");
@@ -39,8 +39,7 @@ public class vote extends HttpServlet {
             jsonw.write(jsonArray);
             jsonw.close();
         } catch (Exception e) {
-            //todo
-            System.out.println("catch");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
 
     }
@@ -51,30 +50,33 @@ public class vote extends HttpServlet {
         response.setContentType("text/json");
         response.setCharacterEncoding("UTF-8");
 
-        boolean isFirstVote = true;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("voted")) {
-                    isFirstVote = false;
-                    break;
-                }
-            }
-        } else { // first time to vote, cookies array is null
-            Cookie voteCookie = new Cookie("voted", "true");
-            voteCookie.setMaxAge(10);
-            response.addCookie(voteCookie);
-        }
-
         String answerFromUser = request.getParameter("answer");
 
-        if (answerFromUser.length() > 0 && isFirstVote) { // user chose answer and ...
-            poll.voteTo(answerFromUser);
-            response.setStatus(200);
-        } else {
-            response.setStatus(400);
-        }
+        if (answerFromUser.length() == 0){
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        }else{
+            boolean isFirstVote = true;
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if (cookie.getName().equals("voted")) {
+                        isFirstVote = false;
+                        break;
+                    }
+                }
+            } else { // first time to vote, cookies array is null
+                Cookie voteCookie = new Cookie("voted", "true");
+                voteCookie.setMaxAge(10);
+                response.addCookie(voteCookie);
+            }
 
+            if (isFirstVote){
+                poll.voteTo(answerFromUser);
+                response.setStatus(HttpServletResponse.SC_OK);
+            }else {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            }
+        }
 
     }
 
