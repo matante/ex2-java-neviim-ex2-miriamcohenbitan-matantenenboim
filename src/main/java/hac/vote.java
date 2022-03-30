@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 
-// a simple demo servlet to remove from your repo upon submission!
 @WebServlet(name = "vote", urlPatterns = {"/api/vote"})
 public class vote extends HttpServlet {
 
@@ -41,7 +40,6 @@ public class vote extends HttpServlet {
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
-
     }
 
     @Override
@@ -52,9 +50,9 @@ public class vote extends HttpServlet {
 
         String answerFromUser = request.getParameter("answer");
 
-        if (answerFromUser.length() == 0){
+        if (answerFromUser.length() == 0) { // user made no choice but pressed vote
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        }else{
+        } else {
             boolean isFirstVote = true;
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
@@ -66,22 +64,19 @@ public class vote extends HttpServlet {
                 }
             } else { // first time to vote, cookies array is null
                 Cookie voteCookie = new Cookie("voted", "true");
-                voteCookie.setMaxAge(10);
+                voteCookie.setMaxAge(60 * 60 * 24);
                 response.addCookie(voteCookie);
             }
 
-            if (isFirstVote){
+            if (isFirstVote) {
                 poll.voteTo(answerFromUser);
                 response.setStatus(HttpServletResponse.SC_OK);
-            }else {
+            } else {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             }
         }
-
     }
 
-
     public void destroy() {
-
     }
 }

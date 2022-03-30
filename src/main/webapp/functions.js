@@ -1,10 +1,19 @@
 (function () {
+    const constants = {
+        QUESTION_PLACE: 0,
+        ANSWERS_PLACE: 1,
+        SC_OK: 200,
+        SC_BAD_REQUEST: 400,
+        SC_FORBIDDEN: 403,
+    };
+
     function displayPollAnswers(json) {
         let question = document.getElementById("pollQuestion");
-        question.innerText = json[0]
+
+        question.innerText = json[constants.QUESTION_PLACE];
 
         let answers = document.getElementById("answers");
-        for (let i = 1; i < json.length; i++) {
+        for (let i = constants.ANSWERS_PLACE; i < json.length; i++) {
             answers.innerHTML += `<li class="list-group-item">
                                 <div class="radio">
                                     <label>
@@ -13,12 +22,12 @@
                                     </label>
                                 </div>
                             </li>
-        `
+        `;
         }
     }
 
+    //******************************************************
     function displayPollVotes(json) {
-
         let votes = document.getElementById("votes");
         votes.innerText = "";
         for (let i = 0; i < json.length; i++) {
@@ -29,9 +38,11 @@
                                     </label>
                                 </div>
                             </li>
-        `
+        `;
         }
     }
+
+    //******************************************************
 
     // takes an array
     function hideElements(ids) {
@@ -45,14 +56,17 @@
             document.getElementById(`${id}`).classList.remove('d-none');
     }
 
+    //******************************************************
 
     function status(response) {
         if (response.status >= 200 && response.status < 300) {
-            return Promise.resolve(response)
+            return Promise.resolve(response);
         } else {
-            return Promise.reject(new Error(response.statusText))
+            return Promise.reject(new Error(response.statusText));
         }
     }
+
+    //******************************************************
 
     async function fetchQuestionAnswers() {
         await fetch("/api/getPoll", {method: "GET"})
@@ -62,9 +76,11 @@
                 displayPollAnswers(json);
             })
             .catch(function (err) {
-                return Promise.reject(new Error(err.statusText))
-            })
+                return Promise.reject(new Error(err.statusText));
+            });
     }
+
+    //******************************************************
 
 
     async function fetchVotes() {
@@ -72,11 +88,13 @@
             .then(res => res.json())
             .then(json => {
                 displayPollVotes(json);
-            })// add votes
-            .catch(function (err) {
-                return Promise.reject(new Error(err.statusText))
             })
+            .catch(function (err) {
+                return Promise.reject(new Error(err.statusText));
+            });
     }
+
+    //******************************************************
 
     document.addEventListener('DOMContentLoaded', () => { // wait for page to load
 
@@ -85,22 +103,34 @@
             .catch((function () {
                 revealElements(['pollError']);
                 hideElements(['noChoice', 'inputForm', 'results', 'invalidVote']);
-
-            }))
-
+            }));
 
         let form = document.getElementById('inputForm');
         form.addEventListener('submit', submitForm);
-    })
+    });
+
+    //******************************************************
+
+    function handleStatus(status) {
+        switch (status) {
+            case constants.SC_OK:
+                hideElements(['invalidVote', 'pollError', 'noChoice']);
+                break;
+            case constants.SC_BAD_REQUEST:
+                revealElements(['noChoice']);
+                hideElements(['invalidVote', 'pollError']);
+                break;
+            case constants.SC_FORBIDDEN:
+                revealElements(['invalidVote']);
+                hideElements(['noChoice', 'pollError']);
+                break;
+        }
+    }
+
+    //******************************************************
 
     const submitForm = async function (event) {
         event.preventDefault();
-
-        const statuses = {
-            SC_OK: 200,
-            SC_BAD_REQUEST: 400,
-            SC_FORBIDDEN: 403,
-        }
 
         let selectedAnswer = "";
         const answers = document.querySelectorAll('input[name="optionsRadios"]');
@@ -119,31 +149,15 @@
             },
             body: new URLSearchParams({answer: selectedAnswer}).toString()
         }).then((res) => {
-
-
-            switch (res.status) {
-                case statuses.SC_OK:
-                    hideElements(['invalidVote', 'pollError', 'noChoice']);
-                    break;
-                case statuses.SC_BAD_REQUEST:
-                    revealElements(['noChoice']);
-                    hideElements(['invalidVote', 'pollError']);
-                    break;
-                case statuses.SC_FORBIDDEN:
-                    revealElements(['invalidVote']);
-                    hideElements(['noChoice', 'pollError']);
-                    break;
-            }
+            handleStatus(res.status);
         })
             .then(fetchVotes)
-            .catch(function (err) {
+            .catch(function () {
                 revealElements(['pollError']);
                 hideElements(['noChoice', 'invalidVote']);
-            })
+            });
+    };
 
-    }
-
-
-})()
+})();
 
 

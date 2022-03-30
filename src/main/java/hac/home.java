@@ -9,14 +9,15 @@ import javax.servlet.annotation.*;
 
 @WebServlet(name = "home", urlPatterns = {""})
 public class home extends HttpServlet {
-    private final String PARAM_NAME = "POLLFILE";
 
     public void init() {
-
+        final String PARAM_NAME = "POLLFILE";
         String fileName = getServletContext().getInitParameter(PARAM_NAME);
         String filePath = getServletContext().getRealPath(fileName);
+        //open file
 
         // read line by line
+
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             ArrayList<String> lines = new ArrayList<>();
             String line;
@@ -25,13 +26,15 @@ public class home extends HttpServlet {
                     lines.add(line);
             }
 
-            getServletContext().setAttribute("poll", new Poll(lines.get(0)));
-            Poll poll = (Poll) getServletContext().getAttribute("poll");
+            final int QUESTION_PLACE = 0;
+            if (lines.size() > 0) {
+                getServletContext().setAttribute("poll", new Poll(lines.get(QUESTION_PLACE)));
+                Poll poll = (Poll) getServletContext().getAttribute("poll");
 
-            for (int i = 1; i < lines.size(); i++) {
-                poll.addAnswer(lines.get(i));
+                for (int i = 1; i < lines.size(); i++) {
+                    poll.addAnswer(lines.get(i));
+                }
             }
-
 
         } catch (IOException e) {
             e.printStackTrace();

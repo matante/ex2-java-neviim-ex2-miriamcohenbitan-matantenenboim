@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 
-// a simple demo servlet to remove from your repo upon submission!
 @WebServlet(name = "getPoll", urlPatterns = {"/api/getPoll"})
 public class getPoll extends HttpServlet {
 
@@ -23,16 +22,13 @@ public class getPoll extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         response.setContentType("text/json");
         response.setCharacterEncoding("UTF-8");
 
         JsonArrayBuilder builder = Json.createArrayBuilder();
-
-
         builder.add(poll.getQuestion());
 
-        for (Answer answer : poll.getAnswers()){
+        for (Answer answer : poll.getAnswers()) {
             builder.add(answer.getAnswer());
         }
         final int MINIMUM_LINES = 3;
@@ -48,13 +44,8 @@ public class getPoll extends HttpServlet {
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
-
     }
 
-
-
-
     public void destroy() {
-
     }
 }

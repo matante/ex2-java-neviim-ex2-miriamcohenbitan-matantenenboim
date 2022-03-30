@@ -4,20 +4,22 @@ public class Answer {
     private String answer;
     private int votes;
 
-    Answer(String otherAnswer){
+    public Answer(String otherAnswer) {
         answer = otherAnswer;
         votes = 0;
     }
 
-    public String getAnswer(){
+    public String getAnswer() {
         return answer;
     }
 
-    public synchronized void vote(){
-        votes ++;
-    }
-    public int getVotes(){
-        return votes;
+    public  void vote() {
+        synchronized(this) {
+            votes++;
+        }
     }
 
+    public int getVotes() {
+        return votes;
+    }
 }
